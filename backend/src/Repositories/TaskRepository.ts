@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../PrismaService';
-import { Prisma } from '@prisma/client';
+import { Prisma, Task } from '@prisma/client';
 
 @Injectable()
 export default class TaskRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll() {
+  async findAll(): Promise<Task[]> {
     return this.prisma.task.findMany();
   }
 
-  async delete(id: number) {
+  async delete(id: number): Promise<Task> {
     return this.prisma.task.delete({
       where: {
         id,
@@ -19,14 +19,26 @@ export default class TaskRepository {
   }
 
   async save(
-    data:
-      | Prisma.XOR<Prisma.TaskCreateInput, Prisma.TaskUncheckedCreateInput>
-      | Prisma.XOR<Prisma.TaskUpdateInput, Prisma.TaskUncheckedUpdateInput>,
-  ) {
+    data: Prisma.XOR<Prisma.TaskCreateInput, Prisma.TaskUncheckedCreateInput> |
+          Prisma.XOR<Prisma.TaskUpdateInput, Prisma.TaskUncheckedUpdateInput>,
+  ): Promise<Task> {
     if (!data.id) {
-      // @todo IMPLEMENT HERE USING PRISMA API
+      // Création d'une nouvelle tâche
+      return this.prisma.task.create({
+        data: {
+          name: data.name,
+          createdAt: new Date(),
+        },
+      });
+    } else {
+      // Mise à jour d'une tâche existante
+      return this.prisma.task.update({
+        where: { id: data.id },
+        data: {
+          name: data.name,
+          updatedAt: new Date(),
+        },
+      });
     }
-
-    // @todo IMPLEMENT HERE USING PRISMA API
   }
 }
