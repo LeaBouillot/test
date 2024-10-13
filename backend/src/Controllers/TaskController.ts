@@ -10,6 +10,8 @@ import {
 import DeleteTask from '../UseCase/DeleteTask/DeleteTask';
 import GetAllTasksUseCase from '../UseCase/GetAllTasks/GetAllTasksUseCase';
 import SaveTaskDto from '../UseCase/SaveTask/SaveTaskDto';
+import SaveTask from '../UseCase/SaveTask/SaveTask';
+import UpdateTask from '../UseCase/UpdateTask/UpdateTask'; // Assure-toi que le cas d'utilisation pour mettre à jour existe
 import UseCaseFactory from '../UseCase/UseCaseFactory';
 
 @Controller()
@@ -23,12 +25,14 @@ export default class TaskController {
 
   @Post('/tasks')
   async create(@Body() dto: SaveTaskDto) {
-    // @todo YOU MUST FOLLOW THE SAME IMPLEMENTATION AS OTHER ENDPOINTS
+    const saveTaskUseCase = this.useCaseFactory.create(SaveTask);
+    return await (await saveTaskUseCase).handle(dto);
   }
 
   @Patch('/tasks/:id')
-  async update(@Body() dto: SaveTaskDto) {
-    // @todo YOU MUST FOLLOW THE SAME IMPLEMENTATION AS OTHER ENDPOINTS
+  async update(@Param('id') id: string, @Body() dto: SaveTaskDto) {
+    const updateTaskUseCase = this.useCaseFactory.create(UpdateTask);
+    return await (await updateTaskUseCase).handle(Number(id), dto); // Passe l'ID et les données mises à jour
   }
 
   @Delete('/tasks/:id')
