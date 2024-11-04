@@ -1,4 +1,4 @@
-import { Check, Delete } from "@mui/icons-material";
+import { Check, Delete } from '@mui/icons-material';
 import {
   Box,
   Button,
@@ -8,31 +8,43 @@ import {
   Typography,
   Card,
   CardContent,
-} from "@mui/material";
-import { useEffect, useState } from "react";
+} from '@mui/material';
+import { useEffect, useState } from 'react';
+import useFetch from '../hooks/useFetch.ts';
+import { Task } from '../index';
 
 const TodoPage = () => {
-  const [tasks, setTasks] = useState<{ id: number; name: string }[]>([]);
-  const [newTaskName, setNewTaskName] = useState("");
+  const api = useFetch();
+  const [ tasks, setTasks ] = useState<Task[]>([]);
+  const [ newTaskName, setNewTaskName ] = useState('');
 
-  useEffect(() => {
-    const initialTasks = [
-      { id: 1, name: "Acheter des courses" },
-      { id: 2, name: "Faire du sport" },
-      { id: 3, name: "Lire un livre" },
-    ];
-    setTasks(initialTasks);
-  }, []);
-
-  const handleDelete = (id: number) => {
-    setTasks(tasks.filter((task) => task.id !== id));
+  const fetchTasks = async () => {
+    setTasks(await api.get('/tasks'));
   };
 
-  const handleSave = () => {
-    if (newTaskName.trim() === "") return;
-    const newTask = { id: Date.now(), name: newTaskName };
-    setTasks([...tasks, newTask]);
-    setNewTaskName("");
+  useEffect(() => {
+    fetchTasks();
+  }, []);
+
+  const handleDelete = async (id: number) => {
+    try {
+      await api.delete(`/tasks/${id}`);
+      fetchTasks();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleSave = async () => {
+    if (newTaskName.trim()) {
+      try {
+        await api.post('/tasks', { name: newTaskName });
+        fetchTasks();
+        setNewTaskName('');
+      } catch (error) {
+        console.error(error);
+      }
+    }
   };
 
   return (
@@ -47,21 +59,21 @@ const TodoPage = () => {
         justifyContent="center"
         mt={5}
         flexDirection="column"
-        sx={{ maxWidth: 400, margin: "0 auto" }}
+        sx={{ maxWidth: 400, margin: '0 auto' }}
       >
         <Box display="flex" justifyContent="center" alignItems="center" mt={2}>
           <TextField
             size="small"
             value={newTaskName}
-            onChange={(e) => setNewTaskName(e.target.value)}
+            onChange={(e:any) => setNewTaskName(e.target.value)}
             fullWidth
-            sx={{ backgroundColor: "#fff" }}
+            sx={{ backgroundColor: '#fff' }}
             placeholder="Ajouter une nouvelle tâche"
             variant="outlined"
           />
           <Button
             variant="contained"
-            sx={{ backgroundColor: "green", color: "#fff", ml: 1 }}
+            sx={{ backgroundColor: 'green', color: '#fff', ml: 1 }}
             onClick={handleSave}
           >
             Ajouter
@@ -73,15 +85,15 @@ const TodoPage = () => {
             <Card
               key={task.id}
               sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
                 marginTop: 1,
-                backgroundColor: "#fff",
+                backgroundColor: '#fff',
               }}
             >
               <CardContent sx={{ flex: 1 }}>
-                <Typography variant="body1" sx={{ color: "#333" }}>
+                <Typography variant="body1" sx={{ color: '#333' }}>
                   {task.name}
                 </Typography>
               </CardContent>
@@ -90,7 +102,7 @@ const TodoPage = () => {
                   <Check />
                 </IconButton>
                 <IconButton
-                  sx={{ color: "#d65f0d" }}
+                  sx={{ color: '#d65f0d' }}
                   onClick={() => handleDelete(task.id)}
                 >
                   <Delete />
