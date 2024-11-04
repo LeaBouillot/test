@@ -6,12 +6,12 @@ import {
   Param,
   Patch,
   Post,
+  Put,
 } from '@nestjs/common';
 import DeleteTask from '../UseCase/DeleteTask/DeleteTask';
 import GetAllTasksUseCase from '../UseCase/GetAllTasks/GetAllTasksUseCase';
 import SaveTaskDto from '../UseCase/SaveTask/SaveTaskDto';
-import SaveTask from '../UseCase/SaveTask/SaveTask';
-import UpdateTask from '../UseCase/UpdateTask/UpdateTask'; // Assure-toi que le cas d'utilisation pour mettre à jour existe
+import SaveTaskUseCase from '../UseCase/SaveTask/SaveTaskUseCase';
 import UseCaseFactory from '../UseCase/UseCaseFactory';
 
 @Controller()
@@ -25,14 +25,15 @@ export default class TaskController {
 
   @Post('/tasks')
   async create(@Body() dto: SaveTaskDto) {
-    const saveTaskUseCase = this.useCaseFactory.create(SaveTask);
-    return await (await saveTaskUseCase).handle(dto);
+    return (await this.useCaseFactory.create(SaveTaskUseCase)).handle(dto);
   }
 
-  @Patch('/tasks/:id')
+  @Put('/tasks/:id')
   async update(@Param('id') id: string, @Body() dto: SaveTaskDto) {
-    const updateTaskUseCase = this.useCaseFactory.create(UpdateTask);
-    return await (await updateTaskUseCase).handle(Number(id), dto); // Passe l'ID et les données mises à jour
+    return (await this.useCaseFactory.create(SaveTaskUseCase)).handle({
+      id: Number(id),
+      ...dto,
+    });
   }
 
   @Delete('/tasks/:id')
